@@ -392,12 +392,13 @@ jobs:
 
       - name: Upload artifacts
         run: |
-          make ci_upload
-      - uses: actions/upload-artifact@v4
-        with:
-          name: "${{ matrix.job_name }}"
-          path: rclone*  
+          make ci_upload   
         env:
           RCLONE_CONFIG_PASS: ${{ secrets.RCLONE_CONFIG_PASS }}
         # Upload artifacts if not a PR && not a fork
         if: env.RCLONE_CONFIG_PASS != '' && github.head_ref == '' && github.repository == 'rclone/rclone'
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "${{ matrix.job_name }}"
+          path: rclone*  
