@@ -400,5 +400,5 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: "${{ android-all }}"
+          name: "${{ matrix.android-all }}"
           path: rclone*  
