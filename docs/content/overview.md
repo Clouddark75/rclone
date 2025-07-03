@@ -62,6 +62,7 @@ Here is an overview of the major features of each cloud storage system.
 | Sia                          | -                 | -       | No               | No              | -         | -        |
 | SMB                          | -                 | R/W     | Yes              | No              | -         | -        |
 | SugarSync                    | -                 | -       | No               | No              | -         | -        |
+| Terabox                      | MD5               | DR/W    | No               | No              | -         | -        |
 | Storj                        | -                 | R       | No               | No              | -         | -        |
 | Uloz.to                      | MD5, SHA256 ¹³    | -       | No               | Yes             | -         | -        |
 | Uptobox                      | -                 | -       | No               | Yes             | -         | -        |
@@ -544,6 +545,7 @@ upon backend-specific capabilities.
 | SugarSync                    | Yes   | Yes  | Yes  | Yes     | No      | No    | Yes          | No                | Yes          | No    | Yes      |
 | Storj                        | Yes ² | Yes  | Yes  | No      | No      | Yes   | Yes          | No                | Yes          | No    | No       |
 | Uloz.to                      | No    | No   | Yes  | Yes     | No      | No    | No           | No                | No           | No    | Yes      |
+| Terabox                      | Yes   | Yes  | Yes  | Yes     | Yes     | No    | No           | No                | No           | Yes   | Yes      |
 | Uptobox                      | No    | Yes  | Yes  | Yes     | No      | No    | No           | No                | No           | No    | No       |
 | WebDAV                       | Yes   | Yes  | Yes  | Yes     | No      | No    | Yes ³        | No                | No           | Yes   | Yes      |
 | Yandex Disk                  | Yes   | Yes  | Yes  | Yes     | Yes     | No    | Yes          | No                | Yes          | Yes   | Yes      |
