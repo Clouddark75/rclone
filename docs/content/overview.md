@@ -63,6 +63,7 @@ Here is an overview of the major features of each cloud storage system.
 | SMB                          | -                 | R/W     | Yes              | No              | -         | -        |
 | SugarSync                    | -                 | -       | No               | No              | -         | -        |
 | Storj                        | -                 | R       | No               | No              | -         | -        |
+| Terabox                      | MD5               | DR/W    | No               | No              | -         | -        |
 | Uloz.to                      | MD5, SHA256 ¹³    | -       | No               | Yes             | -         | -        |
 | Uptobox                      | -                 | -       | No               | Yes             | -         | -        |
 | WebDAV                       | MD5, SHA1 ³       | R ⁴     | Depends          | No              | -         | -        |
