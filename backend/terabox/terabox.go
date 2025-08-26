@@ -34,9 +34,7 @@ import (
 )
 
 const (
-	baseURL       = "https://www.terabox.com"
-	chunkSize     = 4 * fs.Mebi // 4MB
-	fileLimitSize = 4 * fs.Gibi // 4GB
+	baseURL = "https://www.terabox.com"
 
 	// minSleep       = 400 * time.Millisecond // api is extremely rate limited now
 	// maxSleep       = 5 * time.Second
@@ -85,7 +83,7 @@ func init() {
 				Help:     "Parallel upload threads",
 				Name:     "upload_threads",
 				Advanced: true,
-				Default:  3,
+				Default:  5,
 			},
 			{
 				Help:     "Set custom header User Agent",
@@ -153,6 +151,9 @@ type Fs struct {
 
 	// unofficial access [web token required for upload]
 	jsToken string
+
+	isPremium   bool
+	isPremiumMX sync.Once
 }
 
 // NewFs makes a new Fs object from the path
@@ -208,7 +209,7 @@ func NewFs(ctx context.Context, name string, root string, config configmap.Mappe
 	if opt.UserAgent != "" {
 		clientConfig.UserAgent = opt.UserAgent
 	}
-	clientConfig.Timeout = 5 * time.Second
+	clientConfig.Timeout = 5 * fs.Duration(time.Second)
 
 	f.client = rest.NewClient(fshttp.NewClient(newCtx))
 
@@ -555,22 +556,21 @@ func (f *Fs) DirMove(ctx context.Context, src fs.Fs, srcRemote, dstRemote string
 	}
 
 	srcPath := libPath.Join(srcFs.root, srcRemote)
-	if srcFs.origRootItem == nil {
+	if srcFs.root != "/" && srcFs.origRootItem == nil {
 		return fmt.Errorf("source directory not found")
 	}
 
-	_, name := libPath.Split(srcPath)
+	dstPath, name := libPath.Split(libPath.Join(f.root, dstRemote))
 	if name == "" {
 		return fmt.Errorf("couldn't move root directory")
 	}
 
-	if f.origRootItem == nil && f.root != "/" {
+	if f.root != "/" && f.origRootItem == nil {
 		if err := f.apiMkDir(ctx, f.root); err != nil && !api.ErrIsNum(err, -8) {
 			return err
 		}
 	}
 
-	dstPath := libPath.Join(f.root, dstRemote)
 	if err := f.apiOperation(ctx, "move", []api.OperationalItem{{Path: srcPath, Destination: dstPath, NewName: name}}); err != nil {
 		return fmt.Errorf("couldn't move directory: %w", err)
 	}
