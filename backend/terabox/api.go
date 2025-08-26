@@ -197,6 +197,22 @@ func (f *Fs) apiCheckLogin(ctx context.Context) error {
 	return nil
 }
 
+func (f *Fs) apiCheckPremium(ctx context.Context) error {
+	var res api.ResponseUser
+	opt := NewRequest(http.MethodGet, "/rest/2.0/membership/proxy/user")
+	opt.Parameters.Set("method", "query")
+	opt.Parameters.Set("membership_version", "1.0")
+
+	err := f.apiExec(ctx, opt, &res)
+	if err != nil {
+		return err
+	}
+
+	// Premium type: 0: regular user; 1: regular Premium; 2: super Premium
+	f.isPremium = res.Data.MemberInfo.IsVIP > 0
+	return nil
+}
+
 func (f *Fs) apiList(ctx context.Context, dir string) ([]*api.Item, error) {
 	if len(dir) == 0 || dir[0] != '/' {
 		dir = "/" + dir
@@ -394,7 +410,12 @@ func (f *Fs) apiQuotaInfo(ctx context.Context) (*api.ResponseQuota, error) {
 
 // Upload file
 func (f *Fs) apiFileUpload(ctx context.Context, path string, size int64, modTime time.Time, in io.Reader, options []fs.OpenOption, overwriteMode uint8) error {
-	if size > int64(fileLimitSize) {
+	f.isPremiumMX.Do(func() {
+		_ = f.apiCheckPremium(ctx)
+	})
+
+	// freeFileLimitSize - 4GB; premiumFileLimitSize - 128GB
+	if (!f.isPremium && size > int64(4*fs.Gibi)) || (f.isPremium && size > int64(128*fs.Gibi)) {
 		return api.Num2Err(58)
 	}
 
@@ -426,6 +447,7 @@ func (f *Fs) apiFileUpload(ctx context.Context, path string, size int64, modTime
 	}
 
 	// upload chunks
+	chunkSize := getChunkSize(size, f.isPremium)
 	chunksUploaded := map[int]string{}
 	chunkDataPool := sync.Pool{
 		New: func() any {
@@ -575,7 +597,7 @@ retryFileCreate:
 }
 
 func (f *Fs) apiFileLocateUpload(ctx context.Context) error {
-	opt := NewRequest(http.MethodGet, "https://d.terabox.com/rest/2.0/pcs/file?method=locateupload")
+	opt := NewRequest(http.MethodGet, "/rest/2.0/pcs/file?method=locateupload")
 	opt.Parameters = nil
 
 	var res api.ResponseFileLocateUpload
@@ -601,7 +623,8 @@ func (f *Fs) apiFilePrecreate(ctx context.Context, path string, size int64, modT
 	dirPath, _ := libPath.Split(path)
 	opt.MultipartParams.Set("target_path", dirPath)
 
-	if size > int64(chunkSize) {
+	chunkSize := getChunkSize(size, f.isPremium)
+	if size > chunkSize {
 		opt.MultipartParams.Set("block_list", `["5910a591dd8fc18c32a8f3df4fdc1761", "a5fc157d78e6ad1c7e114b056c92821e"]`)
 	} else {
 		opt.MultipartParams.Set("block_list", `["5910a591dd8fc18c32a8f3df4fdc1761"]`)
