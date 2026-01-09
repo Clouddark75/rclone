@@ -89,7 +89,7 @@ retry:
     if retry == 0 && opts.Method == http.MethodPost && opts.MultipartParams != nil {
     	var overhead int64
     	var err error
-    	
+
     	// La firma correcta es: MultipartUpload(ctx, in, params, contentName, fileName, contentType)
     	opts.Body, opts.ContentType, overhead, err = rest.MultipartUpload(
     		ctx,
