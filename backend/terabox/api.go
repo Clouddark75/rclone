@@ -639,31 +639,28 @@ func (f *Fs) apiFilePrecreate(ctx context.Context, path string, size int64, modT
 	return &res, nil
 }
 
-func (f *Fs) apiFileUploadChunk(ctx context.Context, path, uploadID string, chunkNumber int, size int64, data []byte, options []fs.OpenOption) (*api.ResponseUploadedChunk, error) {
-	opt := NewRequest(http.MethodPost, fmt.Sprintf("https://%s/rest/2.0/pcs/superfile2", f.uploadHost))
-	opt.Parameters.Set("method", "upload")
-	opt.Parameters.Set("path", path)
-	opt.Parameters.Set("uploadid", uploadID)
-	opt.Parameters.Set("partseq", fmt.Sprintf("%d", chunkNumber))
-	opt.Parameters.Set("uploadsign", "0")
-	opt.Options = options
+opt := NewRequest(http.MethodPost, fmt.Sprintf("https://%s/rest/2.0/pcs/superfile2", f.uploadHost))
+opt.Parameters.Set("method", "upload")
+opt.Parameters.Set("path", path)
+opt.Parameters.Set("uploadid", uploadID)
+opt.Parameters.Set("partseq", fmt.Sprintf("%d", chunkNumber))
+opt.Parameters.Set("uploadsign", "0")
+opt.Options = options
 
-	formReader, contentType, overhead, err := rest.MultipartUpload(ctx, bytes.NewReader(data), opt.MultipartParams, "file", "blob", "application/octet-stream")
-	if err != nil {
-		return nil, fmt.Errorf("failed to make multipart upload for file: %w", err)
-	}
-	contentLength := overhead + size
-	opt.ContentLength = &contentLength
-	opt.ContentType = contentType
-	opt.Body = formReader
-
-	var res api.ResponseUploadedChunk
-	if err := f.apiExec(ctx, opt, &res); err != nil {
-		return nil, err
-	}
-
-	return &res, nil
+// Cambio aquí: agregar size como segundo argumento
+formReader, contentType, overhead, err := rest.MultipartUpload(ctx, bytes.NewReader(data), size, opt.MultipartParams, "file", "blob")
+if err != nil {
+    return nil, fmt.Errorf("failed to make multipart upload for file: %w", err)
 }
+contentLength := overhead + size
+opt.ContentLength = &contentLength
+opt.ContentType = contentType
+opt.Body = formReader
+var res api.ResponseUploadedChunk
+if err := f.apiExec(ctx, opt, &res); err != nil {
+    return nil, err
+}
+return &res, nil
 
 func (f *Fs) apiFileCreate(ctx context.Context, path, uploadID string, size int64, modTime time.Time, blockList []string, overwriteMode uint8) (*api.ResponseCreate, error) {
 	opt := NewRequest(http.MethodPost, "/api/create")
