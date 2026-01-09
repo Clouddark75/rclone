@@ -86,18 +86,25 @@ retry:
 		}
 	}
 
-	if retry == 0 && opts.Method == http.MethodPost && opts.MultipartParams != nil {
-		var overhead int64
-		var err error
-		opts.Body, opts.ContentType, overhead, err = rest.MultipartUpload(ctx, opts.Body, opts.MultipartParams, opts.MultipartContentName, opts.MultipartFileName)
-		if err != nil {
-			return err
-		}
-		if opts.ContentLength != nil {
-			*opts.ContentLength += overhead
-		}
-	}
-
+    if retry == 0 && opts.Method == http.MethodPost && opts.MultipartParams != nil {
+    	var overhead int64
+    	var err error
+    	
+    	// Obtener el tamaño del archivo de ContentLength
+    	var fileSize int64
+    	if opts.ContentLength != nil {
+    		fileSize = *opts.ContentLength
+    	}
+    	
+    	// Agregar fileSize como segundo argumento
+    	opts.Body, opts.ContentType, overhead, err = rest.MultipartUpload(ctx, opts.Body, fileSize, opts.MultipartParams, opts.MultipartContentName, opts.MultipartFileName)
+    	if err != nil {
+    		return err
+    	}
+    	if opts.ContentLength != nil {
+    		*opts.ContentLength += overhead
+    	}
+    }
 	var reqBody *bytes.Buffer
 	if f.opt.DebugLevel >= 4 && opts.Body != nil && !strings.Contains(opts.RootURL, "/superfile2") {
 		reqBody = bytes.NewBuffer(make([]byte, 0))
@@ -639,28 +646,31 @@ func (f *Fs) apiFilePrecreate(ctx context.Context, path string, size int64, modT
 	return &res, nil
 }
 
-opt := NewRequest(http.MethodPost, fmt.Sprintf("https://%s/rest/2.0/pcs/superfile2", f.uploadHost))
-opt.Parameters.Set("method", "upload")
-opt.Parameters.Set("path", path)
-opt.Parameters.Set("uploadid", uploadID)
-opt.Parameters.Set("partseq", fmt.Sprintf("%d", chunkNumber))
-opt.Parameters.Set("uploadsign", "0")
-opt.Options = options
+func (f *Fs) apiFileUploadChunk(ctx context.Context, path, uploadID string, chunkNumber int, size int64, data []byte, options []fs.OpenOption) (*api.ResponseUploadedChunk, error) {
+	opt := NewRequest(http.MethodPost, fmt.Sprintf("https://%s/rest/2.0/pcs/superfile2", f.uploadHost))
+	opt.Parameters.Set("method", "upload")
+	opt.Parameters.Set("path", path)
+	opt.Parameters.Set("uploadid", uploadID)
+	opt.Parameters.Set("partseq", fmt.Sprintf("%d", chunkNumber))
+	opt.Parameters.Set("uploadsign", "0")
+	opt.Options = options
 
-// Cambio aquí: agregar size como segundo argumento
-formReader, contentType, overhead, err := rest.MultipartUpload(ctx, bytes.NewReader(data), size, opt.MultipartParams, "file", "blob")
-if err != nil {
-    return nil, fmt.Errorf("failed to make multipart upload for file: %w", err)
+	formReader, contentType, overhead, err := rest.MultipartUpload(ctx, bytes.NewReader(data), opt.MultipartParams, "file", "blob")
+	if err != nil {
+		return nil, fmt.Errorf("failed to make multipart upload for file: %w", err)
+	}
+	contentLength := overhead + size
+	opt.ContentLength = &contentLength
+	opt.ContentType = contentType
+	opt.Body = formReader
+
+	var res api.ResponseUploadedChunk
+	if err := f.apiExec(ctx, opt, &res); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
-contentLength := overhead + size
-opt.ContentLength = &contentLength
-opt.ContentType = contentType
-opt.Body = formReader
-var res api.ResponseUploadedChunk
-if err := f.apiExec(ctx, opt, &res); err != nil {
-    return nil, err
-}
-return &res, nil
 
 func (f *Fs) apiFileCreate(ctx context.Context, path, uploadID string, size int64, modTime time.Time, blockList []string, overwriteMode uint8) (*api.ResponseCreate, error) {
 	opt := NewRequest(http.MethodPost, "/api/create")
