@@ -648,7 +648,7 @@ func (f *Fs) apiFileUploadChunk(ctx context.Context, path, uploadID string, chun
 	opt.Parameters.Set("uploadsign", "0")
 	opt.Options = options
 
-	formReader, contentType, overhead, err := rest.MultipartUpload(ctx, bytes.NewReader(data), opt.MultipartParams, "file", "blob")
+	formReader, contentType, overhead, err := rest.MultipartUpload(ctx, bytes.NewReader(data), opt.MultipartParams, "file", "blob", "application/octet-stream")
 	if err != nil {
 		return nil, fmt.Errorf("failed to make multipart upload for file: %w", err)
 	}
