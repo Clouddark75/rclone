@@ -90,20 +90,14 @@ retry:
     	var overhead int64
     	var err error
     	
-    	// Obtener el tamaño del archivo de ContentLength
-    	var fileSize int64
-    	if opts.ContentLength != nil {
-    		fileSize = *opts.ContentLength
-    	}
-    	
-    	// La firma correcta es: MultipartUpload(ctx, in, fileSize, params, contentName, fileName)
+    	// La firma correcta es: MultipartUpload(ctx, in, params, contentName, fileName, contentType)
     	opts.Body, opts.ContentType, overhead, err = rest.MultipartUpload(
     		ctx,
     		opts.Body,
-    		fileSize,
     		opts.MultipartParams,
     		opts.MultipartContentName,
     		opts.MultipartFileName,
+    		opts.MultipartContentType, // <- contentType va al final
     	)
     	if err != nil {
     		return err
@@ -662,14 +656,14 @@ func (f *Fs) apiFileUploadChunk(ctx context.Context, path, uploadID string, chun
 	opt.Parameters.Set("uploadsign", "0")
 	opt.Options = options
 
-	// Agregar size como segundo argumento
+	// La firma correcta es: MultipartUpload(ctx, in, params, contentName, fileName, contentType)
 	formReader, contentType, overhead, err := rest.MultipartUpload(
 		ctx,
 		bytes.NewReader(data),
-		size, // <- Agregar el tamaño aquí
 		opt.MultipartParams,
 		"file",
 		"blob",
+		"application/octet-stream", // <- contentType va al final
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make multipart upload for file: %w", err)
