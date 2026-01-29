@@ -86,26 +86,25 @@ retry:
 		}
 	}
 
-    if retry == 0 && opts.Method == http.MethodPost && opts.MultipartParams != nil {
-    	var overhead int64
-    	var err error
+	if retry == 0 && opts.Method == http.MethodPost && opts.MultipartParams != nil {
+		var overhead int64
+		var err error
 
-    	// Correct signature: MultipartUpload(ctx, in, params, contentName, fileName, contentType)
-    	opts.Body, opts.ContentType, overhead, err = rest.MultipartUpload(
-    		ctx,
-    		opts.Body,
-    		opts.MultipartParams,
-    		opts.MultipartContentName,
-    		opts.MultipartFileName,
-    		opts.MultipartContentType,
-    	)
-    	if err != nil {
-    		return err
-    	}
-    	if opts.ContentLength != nil {
-    		*opts.ContentLength += overhead
-    	}
-    }
+		opts.Body, opts.ContentType, overhead, err = rest.MultipartUpload(
+			ctx,
+			opts.Body,
+			opts.MultipartParams,
+			opts.MultipartContentName,
+			opts.MultipartFileName,
+			opts.MultipartContentType,
+		)
+		if err != nil {
+			return err
+		}
+		if opts.ContentLength != nil {
+			*opts.ContentLength += overhead
+		}
+	}
 	var reqBody *bytes.Buffer
 	if f.opt.DebugLevel >= 4 && opts.Body != nil && !strings.Contains(opts.RootURL, "/superfile2") {
 		reqBody = bytes.NewBuffer(make([]byte, 0))
@@ -656,14 +655,13 @@ func (f *Fs) apiFileUploadChunk(ctx context.Context, path, uploadID string, chun
 	opt.Parameters.Set("uploadsign", "0")
 	opt.Options = options
 
-	// La firma correcta es: MultipartUpload(ctx, in, params, contentName, fileName, contentType)
 	formReader, contentType, overhead, err := rest.MultipartUpload(
 		ctx,
 		bytes.NewReader(data),
 		opt.MultipartParams,
 		"file",
 		"blob",
-		"application/octet-stream", // <- contentType va al final
+		"application/octet-stream",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to make multipart upload for file: %w", err)
