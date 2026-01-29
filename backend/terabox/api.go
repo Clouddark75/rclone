@@ -90,14 +90,14 @@ retry:
     	var overhead int64
     	var err error
 
-    	// La firma correcta es: MultipartUpload(ctx, in, params, contentName, fileName, contentType)
+    	// Correct signature: MultipartUpload(ctx, in, params, contentName, fileName, contentType)
     	opts.Body, opts.ContentType, overhead, err = rest.MultipartUpload(
     		ctx,
     		opts.Body,
     		opts.MultipartParams,
     		opts.MultipartContentName,
     		opts.MultipartFileName,
-    		opts.MultipartContentType, // <- contentType va al final
+    		opts.MultipartContentType,
     	)
     	if err != nil {
     		return err
