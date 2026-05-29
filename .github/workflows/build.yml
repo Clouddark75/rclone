@@ -400,7 +400,26 @@ jobs:
         # Upload artifacts if not a PR && not a fork
         if: env.RCLONE_CONFIG_PASS != '' && github.head_ref == '' && github.repository == 'Clouddark75/rclone'
 
+      - name: Organize Android ABI folders
+        run: |
+          mkdir -p desastre-arm/arm64-v8a
+          mkdir -p desastre-arm/armeabi-v7a
+
+          mkdir -p desastre-amd/x86
+          mkdir -p desastre-amd/x86_64
+
+          cp build/rclone-android-${RCLONE_NDK_VERSION}-armv8a desastre-arm/arm64-v8a/librclone.so
+          cp build/rclone-android-${RCLONE_NDK_VERSION}-armv7a desastre-arm/armeabi-v7a/librclone.so
+
+          cp build/rclone-android-${RCLONE_NDK_VERSION}-x86 desastre-amd/x86/librclone.so
+          cp build/rclone-android-${RCLONE_NDK_VERSION}-x64 desastre-amd/x86_64/librclone.so
+
       - uses: actions/upload-artifact@v4
         with:
-          name: Desastre
-          path: build/**/*  
+          name: Desastre-Arm
+          path: desastre-arm/**/*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Desastre-Amd
+          path: desastre-amd/**/*
