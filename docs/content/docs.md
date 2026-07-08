@@ -3321,6 +3321,7 @@ For the filtering options
 - `--include-from`
 - `--files-from`
 - `--files-from-raw`
+- `--files-from0`
 - `--min-size`
 - `--max-size`
 - `--min-age`
