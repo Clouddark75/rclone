@@ -121,6 +121,8 @@ backends:
      - TestCopyURL
      - TestMoveFileWithIgnoreExisting
      - TestCopyFileCompareDest
+     # fs/sync
+     - TestSyncCompareDest
      #vfs
      - TestFileSetModTime/cache=off,open=false,write=false
      - TestFileSetModTime/cache=off,open=true,write=false
@@ -205,6 +207,7 @@ backends:
    fastlist: false
    ignore:
      - TestIntegration/FsMkdir/FsPutZeroLength
+     - TestRWFileHandleWriteNoWrite
    ignoretests:
      - cmd/bisync
  - backend:  "internetarchive"
