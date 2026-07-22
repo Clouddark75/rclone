@@ -211,7 +211,7 @@ backends:
    ignoretests:
      - cmd/bisync
  - backend:  "internetarchive"
-   remote:   "TestIA:rclone-integration-test"
+   remote:   "TestIA:rclone-integration-test-2"
    fastlist: true
    tests:
      - backend
@@ -548,6 +548,7 @@ backends:
      - TestCaseInsensitiveMoveFile
      - TestFixCase
      - TestListDirSorted        # Can't upload files starting with . - FIXME fix with encoding
+     - TestListDirSortedFn      # Can't upload files starting with . - FIXME fix with encoding
      - TestSyncOverlapWithFilter # Can't upload files starting with . - FIXME fix with encoding
    ignoretests:
      - cmd/bisync
