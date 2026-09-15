@@ -46,33 +46,28 @@ var OptionsInfo = fs.Options{{
 }, {
 	Name:    "rc_web_gui",
 	Default: false,
-	Help:    "Launch WebGUI on localhost **DEPRECATED**",
+	Help:    "Launch WebGUI on localhost",
 	Groups:  "RC",
-	Hide:    fs.OptionHideBoth,
 }, {
 	Name:    "rc_web_gui_update",
 	Default: false,
-	Help:    "Check and update to latest version of web gui **DEPRECATED**",
+	Help:    "Check and update to latest version of web gui",
 	Groups:  "RC",
-	Hide:    fs.OptionHideBoth,
 }, {
 	Name:    "rc_web_gui_force_update",
 	Default: false,
-	Help:    "Force update to latest version of web gui **DEPRECATED**",
+	Help:    "Force update to latest version of web gui",
 	Groups:  "RC",
-	Hide:    fs.OptionHideBoth,
 }, {
 	Name:    "rc_web_gui_no_open_browser",
 	Default: false,
-	Help:    "Don't open the browser automatically **DEPRECATED**",
+	Help:    "Don't open the browser automatically",
 	Groups:  "RC",
-	Hide:    fs.OptionHideBoth,
 }, {
 	Name:    "rc_web_fetch_url",
 	Default: "https://api.github.com/repos/rclone/rclone-webui-react/releases/latest",
-	Help:    "URL to fetch the releases for webgui **DEPRECATED**",
+	Help:    "URL to fetch the releases for webgui",
 	Groups:  "RC",
-	Hide:    fs.OptionHideBoth,
 }, {
 	Name:    "rc_enable_metrics",
 	Default: false,
@@ -112,11 +107,11 @@ type Options struct {
 	Serve               bool                   `config:"rc_serve"`                   // set to serve files from remotes
 	ServeNoModTime      bool                   `config:"rc_serve_no_modtime"`        // don't read the modification time
 	NoAuth              bool                   `config:"rc_no_auth"`                 // set to disable auth checks on methods which require it
-	WebUI               bool                   `config:"rc_web_gui"`                 // set to launch the web ui **DEPRECATED**
-	WebGUIUpdate        bool                   `config:"rc_web_gui_update"`          // set to check new update **DEPRECATED**
-	WebGUIForceUpdate   bool                   `config:"rc_web_gui_force_update"`    // set to force download new update **DEPRECATED**
-	WebGUINoOpenBrowser bool                   `config:"rc_web_gui_no_open_browser"` // set to disable auto opening browser **DEPRECATED**
-	WebGUIFetchURL      string                 `config:"rc_web_fetch_url"`           // set the default url for fetching webgui **DEPRECATED**
+	WebUI               bool                   `config:"rc_web_gui"`                 // set to launch the web ui
+	WebGUIUpdate        bool                   `config:"rc_web_gui_update"`          // set to check new update
+	WebGUIForceUpdate   bool                   `config:"rc_web_gui_force_update"`    // set to force download new update
+	WebGUINoOpenBrowser bool                   `config:"rc_web_gui_no_open_browser"` // set to disable auto opening browser
+	WebGUIFetchURL      string                 `config:"rc_web_fetch_url"`           // set the default url for fetching webgui
 	EnableMetrics       bool                   `config:"rc_enable_metrics"`          // set to disable prometheus metrics on /metrics
 	MetricsHTTP         libhttp.Config         `config:"metrics"`
 	MetricsAuth         libhttp.AuthConfig     `config:"metrics"`
